@@ -1,0 +1,63 @@
+df = pd.read_excel('China debt by age.xlsx', sheet_name='Sheet1')
+
+#
+age_group_mapping = {
+    '20대': 'Ages 20-29',
+    '30대': 'Ages 30-39',
+    '40대': 'Ages 40-49',
+    '50대': 'Ages 50-59',
+    '60대': 'Ages 60-69',
+    '70대 이상': 'Ages 70 and above'
+}
+
+# age_group
+df['age_group'] = df['age_group'].map(age_group_mapping)
+
+# Plot
+fig, ax = plt.subplots(figsize=(10, 7), dpi=300)
+
+pivot_df = df.pivot(index='year', columns='age_group', values='debt_share')
+pivot_df.index = pivot_df.index.astype(str)
+colors = plt.cm.tab10.colors
+
+bottom = np.zeros(len(pivot_df))
+for i, column in enumerate(pivot_df.columns):
+    bars = ax.bar(pivot_df.index, pivot_df[column], bottom=bottom, label=column, color=colors[i % len(colors)])
+    
+    for bar in bars:
+        height = bar.get_height()
+        if height > 0:
+            if column == '70대 이상':
+                # Above 70's
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    bar.get_y() + height + 0.5,
+                    f'{height:.1f}%',
+                    ha='center',
+                    va='bottom',
+                    fontsize=8,
+                    color='black'
+                )
+            else:
+                #
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2,
+                    bar.get_y() + height / 2,
+                    f'{height:.1f}%',
+                    ha='center',
+                    va='center',
+                    fontsize=9,
+                    color='white' if height > 6 else 'black'
+                )
+
+    bottom += pivot_df[column].values
+
+# Title
+ax.set_xlabel("Year")
+ax.set_ylabel("Share (%)")
+ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=3, frameon=False, fontsize=12)
+ax.set_xticks(np.arange(len(pivot_df)))
+ax.set_xticklabels(pivot_df.index)
+plt.xticks(rotation=0)
+plt.tight_layout()
+plt.show()
