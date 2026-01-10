@@ -1,0 +1,36 @@
+df1 = pd.read_excel("Income to Debt ratio (Korea).xlsx", sheet_name="Sheet1")
+# Growth
+df1["growth_rate"] = df1["Income to Debt ratio"].pct_change() * 100  # 전년 대비 성장률 (%)
+df1["growth_rate_i"] = df1["income"].pct_change() * 100  # 전년 대비 성장률 (%)
+df1["growth_rate_l"] = df1["Loans to Resident Sector"].pct_change() * 100  # 전년 대비 성장률 (%)
+
+# Visualization Income to Debt ratio + growth rate
+import matplotlib.pyplot as plt
+
+fig, ax1 = plt.subplots(figsize=(12, 6),dpi=300)
+
+# Income to Debt ratio
+ax1.bar(df1["time"], df1["Income to Debt ratio"], color='orange', label="Debt to Income ratio (%)")
+ax1.set_ylabel("Debt to Income ratio (%)", fontsize=12)
+ax1.set_xlabel("Year", fontsize=12)
+ax1.set_xticks(df1["time"])
+ax1.set_xticklabels(df1["time"], rotation=45)
+ax1.tick_params(axis='y')
+ax1.grid(True)
+
+# Growth y axis
+ax2 = ax1.twinx()
+ax2.plot(df1["time"], df1["growth_rate"], color='darkred', marker='o', linewidth=2, label="Growth Rate of Debt to Income Ratio")
+ax2.plot(df1["time"], df1["growth_rate_i"], color='blue', marker='o', linewidth=2, label="Income Growth Rate")
+ax2.plot(df1["time"], df1["growth_rate_l"], color='green', marker='o', linewidth=2, label="Debt Growth Rate")
+ax2.set_ylabel("Growth Rate (%)", fontsize=12)
+ax2.tick_params(axis='y')
+
+# title
+plt.title("Household Debt to Income Ratio in Korea", fontsize=14)
+fig.legend(loc="upper center", bbox_to_anchor=(0.5, -0.01), ncol=5, fontsize=12)
+
+ax1.set_xlim(df1["time"].iloc[0] - 0.5, df1["time"].iloc[-1] + 0.5)
+
+plt.tight_layout()
+plt.show()
